@@ -1,5 +1,11 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.memory import ConversationBufferMemory
+from langchain.llms import Ollama
+from langchain.callbacks.manager import CallbackManager
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler 
+                                 
+
+
 from langchain.embeddings import GPT4AllEmbeddings
 from langchain.document_loaders import TextLoader
 from langchain.agents import initialize_agent
@@ -10,153 +16,173 @@ from langchain.agents import Tool
 from langchain.llms import OpenAI
 from langchain.chat_models import ChatOpenAI
 from dotenv import load_dotenv
+from langchain.document_loaders import WebBaseLoader
+from langchain.chains.summarize import load_summarize_chain
+from langchain.document_loaders import DirectoryLoader
 import os
 import json
 # import sys
 
-load_dotenv()
-
-def getPrompt():
-    # create our examples
-    examples = [
-    {
-        "query": "Hello",
-        "answer": "Hello, welcome to Walmart customer service. How can I help you?"
-    },
-    {
-        "query": "How can I order any product from the walmart?",
-        "answer": "For availing our services, you can visit walmart.com on a web browser or install our app through app store or the playstore. You can select a product you want to order and and click the buy now button below the product description and then follow the instructions specified on the app or the webpage."
-    },
-    {
-        "query": "My order was not delivered. Can you help me track it?",
-        "answer": "Oh we are so sorry for the inconvenience. Can you give me the order number so I can help you track the order."
-    },
-    {
-        "query": "What is the process for returning an item to Walmart?",
-        "answer": "You can return an item by checking the options tab under 'Your orders' on the walmart website or app and then opting for 'return an item'."
-    },
-    {
-        "query": "What is 2+2?",
-        "answer": "Please ask questions related to walmart only."
-    },
-    ]
+def main(query):
+    print(query)
+    load_dotenv()
+    OPEN_AI_API_KEY = os.environ.get('OPEN_AI_API_KEY')
 
 
-    # create a example template
-    example_template = """
-    User: {query}
-    AI: {answer}
-    """
+    loader = DirectoryLoader(os.getcwd()+"/data/output_chunks/", glob="**/*.txt",silent_errors=True,show_progress=True,use_multithreading=True)
+    # loader = TextLoader(os.getcwd()+"/services/data/output_chunks/chunk_1.txt")
+    # loader = WebBaseLoader("https://lilianweng.github.io/posts/2023-06-23-agent/")
+    print("directory loaded")
+    docs = loader.load()
+    print(docs.count())
+    print("text loaded")
+    llm = Ollama(model="mistral", 
+             temperature=0.3,verbose=True)
+    # llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo",openai_api_key=OPEN_AI_API_KEY)
+    print("LLM ready!")
+    chain = load_summarize_chain(llm, chain_type="refine")
+    chain.run(docs)
 
-    # create a prompt example from above template
-    example_prompt = PromptTemplate(
-        input_variables=["query", "answer"],
-        template=example_template
-    )
+    print("refining")
 
-    # now break our previous prompt into a prefix and suffix
-    # the prefix is our instructions
-    prefix = """You are a courteous customer service agent for Walmart, and your 
-    responses should be concise and directly related to Walmart-related queries. Be
-    as conversational as possible with the user. If a user asks a question unrelated to Walmart, kindly remind them to inquire 
-    about Walmart. Utilize additional tools only when essential and provide responses 
-    in a single sentence. Ensure that all responses pertain to Walmart. Below are some example conversations between the assistant and the customer: 
-    """
 
-    # and the suffix our user input and output indicator
-    suffix = """
-    User: {query}
-    AI: """
+#     prompt_template = """Write structured notes in markdown (.md) format which is compatible with Obsidian note taking app of the following and You will adhere to this given template  :---
 
-    # now create the few shot prompt template
-    few_shot_prompt_template = FewShotPromptTemplate(
-        examples=examples,
-        example_prompt=example_prompt,
-        prefix=prefix,
-        suffix=suffix,
-        input_variables=["query"],
-        example_separator="\n\n"
-    )
+# tags:
+# - CourseNote/
+# ---
+
+# # ❗❓ Information
+# Related to Course::
+# Date::
+# Professor/Speaker::
+# Tags::
+
+# ---
+# # ❗ Topic
+
+ 
+# ## 📦 Resources
+# - 
+# ## 🔑 Key Points
+# - 
+# ## ❓ 
+# - 
+# ## 🎯 Actions
+# - [ ] 
+# - [ ] 
+# - [ ] 
+# - [ ] 
+# - [ ] 
+# ## 📃 Summary of Notes
+# - :
+#     {text}
+#     CONCISE SUMMARY:"""
+
+    prompt_template= """You are a highly capable summarizing assistant that can comply with any request.
+
+You always answer the with markdown formatting. You will be penalized if you do not answer with markdown when it would be possible.
+The markdown formatting you support: headings, bold, italic, links, tables, lists, code blocks, and blockquotes.
+You do not support images and never include images. You will be penalized if you render images.
+
+You also support Mermaid formatting. You will be penalized if you do not render Mermaid diagrams when it would be possible.
+The Mermaid diagrams you support: sequenceDiagram, flowChart, classDiagram, stateDiagram, erDiagram, gantt, journey, gitGraph, pie.
+You are to use every markdown formatting you know to extract details from the text given.The text to summarize is given after the template ends.
+For providing summary you will strictly use this template '''
+# ❗❓ Information
+Related to Course::
+Date::
+Professor/Speaker::
+Tags::
+
+---
+# ❗ Topic
+
+ 
+## 📦 Resources
+- 
+## 🔑 Key Points
+- 
+## ❓ 
+- 
+## 🎯 Actions
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
+## 📃 Summary of Notes
+- '''
+    {text}
+    SUMMARY:
+
+
+
+
+
+"""
+    prompt = PromptTemplate.from_template(prompt_template)
+
     
-    return few_shot_prompt_template
 
-def getDB():
-    INDEX_DIR = os.environ.get('INDEX_DIR')
-    return {
-        "searchDB": FAISS.load_local(os.getcwd() + "/services/data/walmart_index", gpt4allemb),
-        "productDB": FAISS.load_local(os.getcwd() + "/services/data/product_index", gpt4allemb),
-        "policiesDB": FAISS.load_local(os.getcwd() + "/services/data/policies_index", gpt4allemb)
-    }
+    refine_template = (
+        '''
+            "Your job is to produce structured notes in markdown (.md) format which is compatible with Obsidian note taking app\n"
+        "You will adhere to this given template """---
+# ❗❓ Information
+Related to Course::
+Date::
+Professor/Speaker::
+Tags::
 
-def getconvAgent():
-    def walmartSearch(query: str) -> str:
-        docs = searchDB.similarity_search(query, 2)
-        return docs[0].page_content+docs[1].page_content
+---
+# ❗ Topic
 
-    def walmartProduct(query: str) -> str:
-        docs = productDB.similarity_search(query, 2)
-        return docs[0].page_content+docs[1].page_content
+ 
+## 📦 Resources
+- 
+## 🔑 Key Points
+- 
+## ❓ Questions
+- 
+## 🎯 Actions
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
+## 📃 Summary of Notes
+- """"
+        "We have provided an existing summary in markdown (.md) format w up to a certain point: {existing_answer}\n"
+        "We have the opportunity to refine the existing summary using your arsenal of diagrams and markdown formats as needed."
+        
+        "------------\n"
+        "{text}\n"
+        "------------\n"
+        "Given the new context, refine the original summary which is in markdown (.md) "
+        "Our objective is to have a sizeable amount of notes so that almost all of the information can be assimilated into notes"
 
-    def walmartPolicies(query: str) -> str:
-        docs = policiesDB.similarity_search(query, 2)
-        return docs[0].page_content
-
-    # Set of tools for the conversational agent.
-    tools = [
-        Tool(
-            name="Walmart Information",
-            func=walmartSearch,
-            description='Use this tool to get information related Walmart as a company.'
-        ),
-        Tool(
-            name="Walmart Products",
-            func=walmartProduct,
-            description="Use this tool to get information related to the products sold by Walmart."
-        ),
-        Tool(
-            name="Walmart Policies",
-            func=walmartPolicies,
-            description="Use this tool to get information related to the return policies, coupon policies and price-match policies."
-        ),
-    ]
-    conversationalAgent = initialize_agent(
-        agent='zero-shot-react-description', 
-        tools=tools, 
+'''
+        
+    )
+    refine_prompt = PromptTemplate.from_template(refine_template)
+    print("chain summarize loading")
+    
+    chain = load_summarize_chain(
         llm=llm,
-        max_iterations=3,
-        handle_parsing_errors=True,
-        verbose = True
+        chain_type="refine",
+        question_prompt=prompt,
+        refine_prompt=refine_prompt,
+        return_intermediate_steps=True,
+        verbose=True ,
+        input_key="input_documents",
+        output_key="output_text",
     )
-    
-    return conversationalAgent
+    print("chain summarize loading done")
+    result = chain({"input_documents": docs}, return_only_outputs=True)
+    print("result ::\n\n\n\n\n")
 
-#Instantiation of OpenAI model
-OPEN_AI_API_KEY = os.environ.get('OPEN_AI_API_KEY')
-# llm = OpenAI(openai_api_key = OPEN_AI_API_KEY)
-llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo", openai_api_key = OPEN_AI_API_KEY)
-print("LLM ready!")
-
-#Instantiation of Embeddings
-gpt4allemb =  GPT4AllEmbeddings()
-print('gpt4allembeddings ready!')
-
-#Instantiation of Indexes
-db = getDB()
-print("DB ready!")
-searchDB = db['searchDB']
-productDB = db['productDB']
-policiesDB = db['policiesDB']
+    print(result["output_text"])
+    return "notes generated"
 
 
-def mainFunc(query):
-    try:
-        convAgent = getconvAgent()
-        promptTemplate = getPrompt()
-        # sampleQuery = "How to place a new order?"
-        result = convAgent(promptTemplate.format(query = query))
-        # result = convAgent(promptTemplate.format(query = sampleQuery))
-        return result
-    except:
-        print("FewShot Agent Error")   
-
-# mainFunc()

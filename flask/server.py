@@ -3,8 +3,8 @@ import os
 sys.path.insert(0, os.getcwd() + '/services')
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
-from fewShotAgent import mainFunc
-
+from services.fewShotAgent import main as fs
+from services.ytsub import main as yt
 # Initializing flask app
 app = Flask(__name__)
 CORS(app) 
@@ -15,10 +15,13 @@ CORS(app)
 
 def llmCall():
     try:
+
         data = request.json
         query = data['query']
         print("Incoming Query: ", query)
-        result = mainFunc(query)
+        yt(query)
+        result = fs(query)
+
         response = jsonify({"result": result['output']})
         return response
     except:
