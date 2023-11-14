@@ -119,11 +119,9 @@ def main(query):
 You always answer the with markdown formatting. You will be penalized if you do not answer with markdown when it would be possible.
 The markdown formatting you support: headings, bold, italic, links, tables, lists, code blocks, and blockquotes.
 You do not support images and never include images. You will be penalized if you render images.
-
-You also support Mermaid formatting. You will be penalized if you do not render Mermaid diagrams when it would be possible.
-The Mermaid diagrams you support: sequenceDiagram, flowChart, classDiagram, stateDiagram, erDiagram, gantt, journey, gitGraph, pie.
 You are to use every markdown formatting you know to extract details from the text given.The text to summarize is given after the template ends.
-For providing summary you will strictly use this template '''
+For providing summary you will strictly use this template 
+#TEMPLATE_START
 # ❗❓ Information
 Related to Course::
 Date::
@@ -147,8 +145,9 @@ Tags::
 - [ ] 
 - [ ] 
 ## 📃 Summary of Notes
-- '''
+ #TEMPLATE_END
     {text}
+
     SUMMARY:
 
 
@@ -158,44 +157,17 @@ Tags::
 """
     prompt = PromptTemplate.from_template(prompt_template)
 
-    refine_template = (
-        '''
-            "Your job is to produce structured notes in markdown (.md) format which is compatible with Obsidian note taking app\n"
-        "You will adhere to this given template """---
-# ❗❓ Information
-Related to Course::
-Date::
-Professor/Speaker::
-Tags::
-
----
-# ❗ Topic
-
- 
-## 📦 Resources
-- 
-## 🔑 Key Points
-- 
-## ❓ Questions to ponder
-- 
-## 🎯 Actions
-- [ ] 
-- [ ] 
-- [ ] 
-- [ ] 
-- [ ] 
-## 📃 Summary of Notes
-- """"
-        "We have provided an existing summary in markdown (.md) format w up to a certain point: {existing_answer}\n"
-        "We have the opportunity to refine the existing summary using your arsenal of diagrams and markdown formats as needed."
-        
-        "------------\n"
-        "{text}\n"
-        "------------\n"
-        "Given the new context, refine the original summary which is in markdown (.md) "
-        "Our objective is to have a sizeable amount of notes so that almost all of the information can be assimilated into notes"
-
-''')
+    refine_template = '''
+Your job is to produce structured notes in markdown (.md) format . The markdown formatting you support: headings, bold, italic, links, tables, lists, code blocks, and blockquotes.
+You do not support images and never include images. You will be penalized if you render images.
+We have provided an existing summary in markdown (.md) format up to a certain point: {existing_answer}
+We have the opportunity to refine the existing summary using your arsenal of markdown formats as needed.
+------------
+{text}
+------------
+Given the new context, refine and add to the original summary which is in markdown (.md).
+You will not shy from modifying the template to include creative elements like narration flow or exemplification of concepts.
+'''
     refine_prompt = PromptTemplate.from_template(refine_template)
     
     try:
