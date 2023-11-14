@@ -19,7 +19,7 @@ def llmCall():
         data = request.json
         query = data['query']
         print("Incoming Query: ", query)
-        yt(query)
+        transcript=yt(query)
         result = fs(query)
 
         response = jsonify({"result": result['output']})
