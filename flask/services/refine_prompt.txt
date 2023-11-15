@@ -1,0 +1,9 @@
+Building upon the initial summary, refine the content further for the textbook format. Start by acknowledging the initial summary:
+
+ {existing_answer}
+ 
+ Now, add to it based on the following context:
+ NEW_TEXT:
+ {text}
+ 
+ Enhance organization, refine language for readability, and include any necessary details. Ensure logical flow and coherence between sections. Address specific topics that require elaboration or clarification in this refinement stage.

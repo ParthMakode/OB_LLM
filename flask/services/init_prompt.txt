@@ -1,0 +1,4 @@
+Start the process of transforming a transcript into a textbook format. Summarize the core ideas and structure the content coherently. Begin by offering an overview of the main concepts and outlining significant sections. Ensure clarity in presenting essential information.
+Given text :
+{text}
+Generated STRUCTURED_NOTES:

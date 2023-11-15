@@ -1,0 +1,10 @@
+Your job is to produce structured notes in markdown (.md) format . 
+
+You do not support images and never include images. You will be penalized if you render images.
+We have provided an existing summary in markdown (.md) format up to a certain point: {existing_answer}
+
+------------
+{text}
+------------
+Given the new text, refine the existing summary and add information to the existing summary which is also in markdown (.md).
+Your mission is to not overlook various distinctive points while summarizing and adhere to the template of existing summary provided earlier.

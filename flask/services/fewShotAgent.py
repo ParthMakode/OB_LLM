@@ -53,7 +53,7 @@ def main(query):
     try:
         text_splitter = RecursiveCharacterTextSplitter(
     # Set a really small chunk size, just to show.
-    chunk_size = 8000,
+    chunk_size = 3000,
     chunk_overlap  = 100,
     length_function = len,
     is_separator_regex = False,
@@ -62,112 +62,30 @@ def main(query):
         
     except Exception as e:
         print(e)
-    # loader = DirectoryLoader(os.getcwd()+"/data/output_chunks/", glob="**/*.txt",silent_errors=True,show_progress=True,use_multithreading=True)
-    # loader = TextLoader(os.getcwd()+"/services/data/output_chunks/chunk_1.txt")
-    # loader = WebBaseLoader("https://lilianweng.github.io/posts/2023-06-23-agent/")
-    print("directory loaded")
+
+    
     try:
         
         
-        llm = Ollama(model="mistral", 
-             temperature=0.3,verbose=True,num_gpu=1,num_ctx=8000,)
-        # llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo",openai_api_key=OPEN_AI_API_KEY)
+        # llm = Ollama(model="mistral", 
+        #      temperature=0.3,verbose=True,num_gpu=1,num_ctx=8000,)
+        llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo",openai_api_key=OPEN_AI_API_KEY)
         print("LLM ready!")
         print("refining")
 
     except Exception as e:
         print(f"e :{e}")
-    
-    
 
-
-#     prompt_template = """Write structured notes in markdown (.md) format which is compatible with Obsidian note taking app of the following and You will adhere to this given template  :---
-
-# tags:
-# - CourseNote/
-# ---
-
-# # ❗❓ Information
-# Related to Course::
-# Date::
-# Professor/Speaker::
-# Tags::
-
-# ---
-# # ❗ Topic
-
- 
-# ## 📦 Resources
-# - 
-# ## 🔑 Key Points
-# - 
-# ## ❓ 
-# - 
-# ## 🎯 Actions
-# - [ ] 
-# - [ ] 
-# - [ ] 
-# - [ ] 
-# - [ ] 
-# ## 📃 Summary of Notes
-# - :
-#     {text}
-#     CONCISE SUMMARY:"""
-
-    prompt_template= """You are a highly capable summarizing assistant that can comply with any request.
-
-You always answer the with markdown formatting. You will be penalized if you do not answer with markdown when it would be possible.
-The markdown formatting you support: headings, bold, italic, links, tables, lists, code blocks, and blockquotes.
-You do not support images and never include images. You will be penalized if you render images.
-You are to use every markdown formatting you know to extract details from the text given.The text to summarize is given after the template ends.
-For providing summary you will strictly use this template 
-#TEMPLATE_START
-# ❗❓ Information
-Related to Course::
-Date::
-Professor/Speaker::
-Tags::
-
----
-# ❗ Topic
-
- 
-## 📦 Resources
-- 
-## 🔑 Key Points
-- 
-## ❓ Questions to ponder
-- 
-## 🎯 Actions
-- [ ] 
-- [ ] 
-- [ ] 
-- [ ] 
-- [ ] 
-## 📃 Summary of Notes
- #TEMPLATE_END
-    {text}
-
-    SUMMARY:
-
-
-
-
-
-"""
+    prompt_file_path = os.getcwd()+"/flask/services/init_prompt.txt"
+    temp=""
+    with open(prompt_file_path, 'r', encoding='utf-8') as file:
+        temp=file.read()
+    prompt_template= temp
     prompt = PromptTemplate.from_template(prompt_template)
-
-    refine_template = '''
-Your job is to produce structured notes in markdown (.md) format . The markdown formatting you support: headings, bold, italic, links, tables, lists, code blocks, and blockquotes.
-You do not support images and never include images. You will be penalized if you render images.
-We have provided an existing summary in markdown (.md) format up to a certain point: {existing_answer}
-We have the opportunity to refine the existing summary using your arsenal of markdown formats as needed.
-------------
-{text}
-------------
-Given the new context, refine and add to the original summary which is in markdown (.md).
-You will not shy from modifying the template to include creative elements like narration flow or exemplification of concepts.
-'''
+    prompt_file_path = os.getcwd()+"/flask/services/refine_prompt.txt"
+    with open(prompt_file_path, 'r', encoding='utf-8') as file:
+        temp=file.read()
+    refine_template = temp
     refine_prompt = PromptTemplate.from_template(refine_template)
     
     try:
