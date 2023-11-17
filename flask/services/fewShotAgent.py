@@ -7,9 +7,9 @@ import subprocess
 from langchain.embeddings import GPT4AllEmbeddings
 from langchain.document_loaders import TextLoader
 from langchain.agents import initialize_agent
-from langchain import FewShotPromptTemplate
+from langchain.prompts import FewShotPromptTemplate
 from langchain.vectorstores import FAISS
-from langchain import PromptTemplate
+from langchain.prompts import PromptTemplate
 from langchain.agents import Tool
 from langchain.llms import OpenAI
 from langchain.chat_models import ChatOpenAI
@@ -50,8 +50,8 @@ def main(query):
     try:
         text_splitter = RecursiveCharacterTextSplitter(
     # Set a really small chunk size, just to show.
-    chunk_size = 3000,
-    chunk_overlap  = 100,
+    chunk_size = 5000,
+    chunk_overlap  = 250,
     length_function = len,
     is_separator_regex = False,
     )
@@ -63,8 +63,8 @@ def main(query):
     
     try:
                
-        llm = Ollama(model="mistral", temperature=0,verbose=True,num_gpu=1,num_ctx=8000,)
-        # llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo",openai_api_key=OPEN_AI_API_KEY)
+        # llm = Ollama(model="mistral", temperature=0,verbose=True,num_gpu=1,num_ctx=8000,)
+        llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo",openai_api_key=OPEN_AI_API_KEY,verbose=True)
         print("LLM ready!")
         
 

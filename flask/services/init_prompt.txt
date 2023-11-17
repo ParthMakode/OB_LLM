@@ -1,4 +1,4 @@
-Start the process of transforming a transcript into a textbook format. Summarize the core ideas and structure the content coherently. Begin by offering an overview of the main concepts and outlining significant sections. Ensureto output summary in markdown format 
+Start the process of transforming a transcript of a youtube video into a lecture notes format. Summarize the core content and structure it coherently. Use markdown elements like Paragraphs, Sections , Bullet Points , lists etc. Ensure to output summary in markdown format .
 Given text :
 {text}
-Generated STRUCTURED_NOTES:
+Generated NOTES:

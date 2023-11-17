@@ -1,15 +1,8 @@
-Building upon the initial summary, refine the content further in alignment to the textbook format.### The Textbook Format
-  - Ensure that the content is well-organized with clear headings, subheadings, and a logical structure. Verify that each section flows seamlessly into the next.
-  - Refine the language for optimal readability. Consider using concise and precise language to convey ideas effectively. Eliminate unnecessary jargon and ensure that complex concepts are explained clearly.
-  - Review the logical flow of the content. Ensure that there is a smooth transition between sections and that the information presented aligns coherently with the overall theme.
-By following these guidelines, refine the content to align with the structure and style typical of a textbook, creating an educational and informative resource.
- Start by acknowledging the initial summary:
-
- {existing_answer}
- 
- Now, add to it based on the following NEW_TEXT:
- NEW_TEXT:
- {text}
- 
- Enhance organization, refine language for readability, and include any necessary details. Ensure logical flow and coherence between sections. You will output the summary in textbook format which encompasses the entire transcript's knowledge. 
+Building upon the initial NOTES, refine the content further in alignment to the lecture .
+SPECIAL INSTRUCTIONS: Verify that each section flows seamlessly into the next. Refine the language for optimal readability. Evaluate the content's logical flow, ensuring seamless transitions between sections and coherence with the overall theme.
+Start by acknowledging the initial summary:
+{existing_answer}
+Now, consider the addition of the following text chunk :
+{text}
+You will output notes in markdown format .
  

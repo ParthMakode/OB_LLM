@@ -21,8 +21,8 @@ def llmCall():
         print("Incoming Query: ", query)
         transcript=yt(query)
         result = fs(query)
-
-        response = jsonify({"result": result['output']})
+        
+        response = jsonify({"result": result})
         return response
     except:
         print("LLM call error")
@@ -33,4 +33,4 @@ def llmCall():
       
 # Running app
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True) 
