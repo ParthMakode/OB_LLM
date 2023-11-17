@@ -23,6 +23,7 @@ from langchain.document_loaders import UnstructuredFileLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.text_splitter import TokenTextSplitter
 
+
 # import sys
 
 def main(query):
@@ -39,11 +40,7 @@ def main(query):
     except Exception as e:
         print(e)
     print("trancript from filez:")
-    # try:
-    #     with subprocess.Popen(['tee', os.getcwd()+"data/subtitle.txt"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True) as process:
-    #         stdout, stderr = process.communicate()
-    # except Exception as e:
-    #     print(e)
+   
     loader = UnstructuredFileLoader(os.getcwd()+"/data/subtitle.txt",silent_errors=True,show_progress=True,)
 
     doc= loader.load()
@@ -65,13 +62,11 @@ def main(query):
 
     
     try:
-        
-        
-        # llm = Ollama(model="mistral", 
-        #      temperature=0.3,verbose=True,num_gpu=1,num_ctx=8000,)
-        llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo",openai_api_key=OPEN_AI_API_KEY)
+               
+        llm = Ollama(model="mistral", temperature=0,verbose=True,num_gpu=1,num_ctx=8000,)
+        # llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo",openai_api_key=OPEN_AI_API_KEY)
         print("LLM ready!")
-        print("refining")
+        
 
     except Exception as e:
         print(f"e :{e}")
